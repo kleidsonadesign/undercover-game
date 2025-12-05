@@ -27,9 +27,13 @@ interface GameState {
   wordPair: WordPair;
   turnIndex: number;
   winner: string | null;
+  // NOVO: Adicione as configurações na tipagem
+  settings: {
+    mrWhiteCount: number;
+    undercoverCount: number;
+  }
 }
 
-// URL da API (Render ou Localhost)
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 const socket: Socket = io(SOCKET_URL);
 
@@ -55,6 +59,11 @@ function App() {
 
   const startGame = () => socket.emit('start_game', roomId);
   
+  // NOVO: Função para alterar settings
+  const changeSettings = (setting: 'mrWhiteCount' | 'undercoverCount', change: number) => {
+    socket.emit('change_settings', { roomId, setting, change });
+  };
+
   const sendDescription = () => {
     if(descriptionInput.trim()) {
       socket.emit('send_description', { roomId, text: descriptionInput });
@@ -65,49 +74,29 @@ function App() {
   const votePlayer = (targetId: string) => socket.emit('vote_player', { roomId, targetId });
   const sendMrWhiteGuess = () => socket.emit('mr_white_guess', { roomId, guess: mrWhiteGuess });
 
-  // --- TELA INICIAL (LOGIN) ---
   if (!joined) {
     return (
       <div className="container login-screen">
         <h1 className="game-title">🕵️‍♂️ UNDERCOVER</h1>
-        
         <div className="input-group">
           <label>SEU APELIDO</label>
-          <input 
-            placeholder="Ex: João" 
-            value={playerName} 
-            onChange={(e) => setPlayerName(e.target.value)} 
-          />
+          <input placeholder="Ex: João" value={playerName} onChange={(e) => setPlayerName(e.target.value)} />
         </div>
-
         <div className="input-group">
           <label>NOME DA SALA</label>
-          <input 
-            placeholder="Ex: Batata" 
-            value={roomId} 
-            onChange={(e) => setRoomId(e.target.value)} 
-          />
+          <input placeholder="Ex: Batata" value={roomId} onChange={(e) => setRoomId(e.target.value)} />
         </div>
-        
-        {/* Este é o botão que coloca o usuário na sala */}
-        <button className="btn-primary btn-large" onClick={joinRoom}>
-          ENTRAR NA SALA
-        </button>
+        <button className="btn-primary btn-large" onClick={joinRoom}>ENTRAR NA SALA</button>
       </div>
     );
   }
 
-  // --- TELA DE CARREGAMENTO ---
   if (!gameState) return <div className="container"><h2>Conectando...</h2></div>;
-
-  // --- DADOS DO JOGADOR ---
   const me = gameState.players.find((p) => p.id === socket.id);
   if (!me) return <div className="container">Erro: Reinicie a página.</div>;
-
   const currentPlayer = gameState.players[gameState.turnIndex];
   const isMyTurn = gameState.phase === 'DESCRIPTION' && currentPlayer?.id === socket.id;
 
-  // --- JOGO PRINCIPAL ---
   return (
     <div className="container">
       <header>
@@ -122,36 +111,53 @@ function App() {
         )}
       </header>
 
-      {/* LOBBY (SALA DE ESPERA) */}
+      {/* LOBBY */}
       {gameState.phase === 'LOBBY' && (
         <div className="phase-box">
           <h2>Quem vai jogar? ({gameState.players.length})</h2>
           <ul className="player-list">
-            {gameState.players.map(p => (
-                <li key={p.id}>
-                    {p.name} {p.id === socket.id && ' (Você)'}
-                </li>
-            ))}
+            {gameState.players.map(p => <li key={p.id}>{p.name} {p.id === socket.id && ' (Você)'}</li>)}
           </ul>
           
-          <p className="hint">Esperem todos entrarem antes de começar.</p>
+          {/* NOVA ÁREA DE CONFIGURAÇÃO */}
+          <div className="settings-box" style={{margin: '20px 0', padding: '15px', background: 'rgba(0,0,0,0.3)', borderRadius: '10px'}}>
+             <h3>Configurar Jogo</h3>
+             
+             <div className="setting-row" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}}>
+               <span>⚪ Sr. Branco:</span>
+               <div className="controls">
+                 <button className="btn-small" onClick={() => changeSettings('mrWhiteCount', -1)}>-</button>
+                 <span style={{margin: '0 10px', fontSize: '1.2em'}}>{gameState.settings?.mrWhiteCount || 0}</span>
+                 <button className="btn-small" onClick={() => changeSettings('mrWhiteCount', 1)}>+</button>
+               </div>
+             </div>
 
-          <button 
-            className="btn-primary" 
-            onClick={startGame} 
-            disabled={gameState.players.length < 3}
-          >
+             <div className="setting-row" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+               <span>🕵️‍♂️ Espiões:</span>
+               <div className="controls">
+                 <button className="btn-small" onClick={() => changeSettings('undercoverCount', -1)}>-</button>
+                 <span style={{margin: '0 10px', fontSize: '1.2em'}}>{gameState.settings?.undercoverCount || 0}</span>
+                 <button className="btn-small" onClick={() => changeSettings('undercoverCount', 1)}>+</button>
+               </div>
+             </div>
+             
+             <p style={{fontSize: '0.8em', marginTop: '10px', color: '#aaa'}}>
+                Total de Inimigos: {(gameState.settings?.mrWhiteCount || 0) + (gameState.settings?.undercoverCount || 0)} 
+                (Resto serão Civis)
+             </p>
+          </div>
+
+          <button className="btn-primary" onClick={startGame} disabled={gameState.players.length < 3}>
             {gameState.players.length < 3 ? 'Aguardando Jogadores (Min 3)...' : 'COMEÇAR PARTIDA'}
           </button>
         </div>
       )}
 
-      {/* JOGO: DESCRIÇÃO */}
+      {/* MANTENHA O RESTO DAS FASES IGUAIS (DESCRIPTION, VOTING, ETC...) */}
       {gameState.phase === 'DESCRIPTION' && (
         <div className="phase-box">
           <h3>📢 Hora da Descrição</h3>
           <p>Vez de: <strong style={{color: '#ffd700'}}>{currentPlayer?.name}</strong></p>
-          
           <div className="descriptions-log">
              {gameState.players.map(p => (
                <div key={p.id} className={`player-msg ${!p.isAlive ? 'dead' : ''}`}>
@@ -159,22 +165,15 @@ function App() {
                </div>
              ))}
           </div>
-
           {isMyTurn && me.isAlive && (
             <div className="action-area">
-              <input 
-                autoFocus
-                value={descriptionInput} 
-                onChange={(e) => setDescriptionInput(e.target.value)} 
-                placeholder="Descreva sua palavra..."
-              />
+              <input autoFocus value={descriptionInput} onChange={(e) => setDescriptionInput(e.target.value)} placeholder="Descreva sua palavra..." />
               <button className="btn-primary" onClick={sendDescription}>ENVIAR</button>
             </div>
           )}
         </div>
       )}
 
-      {/* JOGO: VOTAÇÃO */}
       {gameState.phase === 'VOTING' && (
         <div className="phase-box">
           <h3 style={{color: '#ff4757'}}>☠️ Eliminação</h3>
@@ -182,9 +181,7 @@ function App() {
           <div className="grid-vote">
             {gameState.players.map(p => (
               p.isAlive && p.id !== socket.id && (
-                <button key={p.id} className="btn-danger" onClick={() => votePlayer(p.id)}>
-                   {p.name}
-                </button>
+                <button key={p.id} className="btn-danger" onClick={() => votePlayer(p.id)}>{p.name}</button>
               )
             ))}
           </div>
@@ -192,36 +189,27 @@ function App() {
         </div>
       )}
 
-      {/* JOGO: CHANCE MR WHITE */}
       {gameState.phase === 'MR_WHITE_GUESS' && (
         <div className="phase-box">
           <h3 style={{color: '#ffd700'}}>Sr. Branco Encurralado!</h3>
           <p>Ele tem uma chance de adivinhar.</p>
           {me.role === 'mr_white' && !me.isAlive && (
              <div className="action-area">
-               <input 
-                  autoFocus
-                  placeholder="Qual é a palavra dos civis?" 
-                  value={mrWhiteGuess} 
-                  onChange={(e) => setMrWhiteGuess(e.target.value)} 
-               />
+               <input autoFocus placeholder="Qual é a palavra dos civis?" value={mrWhiteGuess} onChange={(e) => setMrWhiteGuess(e.target.value)} />
                <button className="btn-primary" onClick={sendMrWhiteGuess}>TENTAR SALVAR</button>
              </div>
           )}
         </div>
       )}
 
-      {/* FIM DE JOGO */}
       {gameState.phase === 'GAME_OVER' && (
         <div className="phase-box">
           <h1>🏆 Fim de Jogo!</h1>
-          
           <h2 style={{color: '#ffd700'}}>
             {gameState.winner === 'CIVILIANS_WIN' && 'Civis Venceram!'}
             {gameState.winner === 'IMPOSTORS_WIN' && 'Impostores Venceram!'}
             {gameState.winner === 'MR_WHITE_WINS' && 'Sr. Branco Venceu!'}
           </h2>
-
           {gameState.wordPair && (
             <div className="reveal-box">
               <p>Civis: <strong>{gameState.wordPair.civilian}</strong></p>
