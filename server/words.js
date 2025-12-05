@@ -32,7 +32,7 @@ module.exports = [
     { civilian: "Harry Potter", undercover: "Senhor dos Anéis" }, // Magia/Fantasia
     { civilian: "Instagram", undercover: "TikTok" }, // Redes sociais de vídeo/foto
     { civilian: "Notebook", undercover: "Computador" },
-    { civilian: "Sapo", undercover: "Perereca" }
+    { civilian: "Sapo", undercover: "Perereca" },
 // --- Comida e Bebida (Muito Difícil) ---
     { civilian: "Sushi", undercover: "Sashimi" }, // Ambos japoneses e peixe cru
     { civilian: "Macarrão", undercover: "Lasanha" }, // Massas com molho
@@ -61,4 +61,5 @@ module.exports = [
     { civilian: "Trovão", undercover: "Relâmpago" }, // Tempestade (Barulho vs Luz)
     { civilian: "Bombeiro", undercover: "Policial" }, // Uniforme, heróis, sirene
     // Adicione quantas quiser aqui...
+
 ];
