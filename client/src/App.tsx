@@ -99,7 +99,7 @@ function App() {
     <div className="site-footer">
       Desenvolvido e Projetado por 
       {/* Troque o href abaixo pelo link do seu perfil real */}
-      <a href="kadevpt.vercel.app" target="_blank" rel="noopener noreferrer">
+      <a href="https://kadevpt.vercel.app/" target="_blank" rel="noopener noreferrer">
         <strong>Kleidson Almeida Santos</strong>
       </a>
     </div>
