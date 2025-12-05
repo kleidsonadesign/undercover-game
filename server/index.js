@@ -21,11 +21,20 @@ const io = new Server(server, {
 let games = {}; 
 
 io.on('connection', (socket) => {
-    console.log(`Jogador conectado: ${socket.id}`);
+    console.log(`Nova conexão: ${socket.id}`);
 
     // 1. Entrar/Criar Sala
     socket.on('join_room', ({ roomId, playerName }) => {
+        // --- FIX: Sai da sala anterior se houver (evita duplicidade) ---
+        if (socket.data.roomId) {
+            socket.leave(socket.data.roomId);
+        }
+
         socket.join(roomId);
+        
+        // --- O SEGREDO: Salva a sala DENTRO do socket ---
+        socket.data.roomId = roomId; 
+        socket.data.playerName = playerName;
 
         // Se a sala não existe, cria
         if (!games[roomId]) {
@@ -41,43 +50,38 @@ io.on('connection', (socket) => {
                     mrWhiteCount: 1,
                     undercoverCount: 1
                 },
-                deleteTimer: null // <--- NOVO: Controle do timer de exclusão
+                deleteTimer: null
             };
         }
 
         const game = games[roomId];
 
-        // --- LÓGICA DE CANCELAR EXCLUSÃO ---
-        // Se a sala estava marcada para ser deletada (estava vazia), cancela!
+        // Cancela exclusão se a sala ia ser deletada
         if (game.deleteTimer) {
             console.log(`Sala ${roomId}: Exclusão cancelada (alguém entrou).`);
             clearTimeout(game.deleteTimer);
             game.deleteTimer = null;
         }
 
-        const newPlayer = {
-            id: socket.id,
-            name: playerName,
-            role: null,
-            word: null,
-            isAlive: true,
-            votes: 0,
-            score: 0,
-            description: ""
-        };
+        // Verifica se o jogador já não está na lista (pra não duplicar nome se der F5)
+        const existingPlayer = game.players.find(p => p.id === socket.id);
+        if (!existingPlayer) {
+            const newPlayer = {
+                id: socket.id,
+                name: playerName,
+                role: null,
+                word: null,
+                isAlive: true,
+                votes: 0,
+                score: 0,
+                description: ""
+            };
+            game.players.push(newPlayer);
+        }
 
-        game.players.push(newPlayer);
         io.to(roomId).emit('update_game', game);
     });
 
-    // ... (MANTENHA OS EVENTOS change_settings, start_game, send_description, vote_player, mr_white_guess IGUAIS) ...
-    // Vou omitir aqui para não ficar gigante, mas você DEVE manter o código que já tinha dessas funções.
-    // O que muda é apenas o join_room (acima) e o disconnect (abaixo).
-    
-    // CASO PRECISE, COPIE E COLE AS FUNÇÕES INTERMEDIÁRIAS DO CÓDIGO ANTERIOR AQUI
-    // (change_settings, start_game, send_description, vote_player, mr_white_guess)
-    
-    // --- REPETINDO O CÓDIGO INTERMEDIÁRIO PARA FACILITAR SUA VIDA ---
     socket.on('change_settings', ({ roomId, setting, change }) => {
         const game = games[roomId];
         if (!game || game.phase !== 'LOBBY') return;
@@ -130,7 +134,6 @@ io.on('connection', (socket) => {
             player.isAlive = true;
             player.votes = 0;
             player.description = "";
-            
             if (player.role === 'civilian') player.word = game.wordPair.civilian;
             else if (player.role === 'undercover') player.word = game.wordPair.undercover;
             else player.word = null;
@@ -196,33 +199,31 @@ io.on('connection', (socket) => {
         io.to(roomId).emit('update_game', game);
     });
 
-    // --- NOVA LÓGICA DE DESCONEXÃO E LIMPEZA ---
+    // --- NOVA LÓGICA DE DESCONEXÃO (DIRETA E RÁPIDA) ---
     socket.on('disconnect', () => {
-        console.log(`Jogador desconectado: ${socket.id}`);
+        console.log(`Desconectado: ${socket.id}`);
         
-        // Procura em qual sala o jogador estava
-        for (const roomId in games) {
+        // Recupera a sala direto do "crachá" do socket
+        const roomId = socket.data.roomId; 
+
+        if (roomId && games[roomId]) {
             const game = games[roomId];
-            const playerIndex = game.players.findIndex(p => p.id === socket.id);
+            
+            // Remove o jogador
+            game.players = game.players.filter(p => p.id !== socket.id);
+            
+            // Avisa a sala IMEDIATAMENTE
+            io.to(roomId).emit('update_game', game);
+            
+            console.log(`Jogador removido da sala ${roomId}. Restam: ${game.players.length}`);
 
-            if (playerIndex !== -1) {
-                // Remove o jogador da lista
-                game.players.splice(playerIndex, 1);
-                
-                // Avisa os outros que ele saiu
-                io.to(roomId).emit('update_game', game);
-
-                // Se a sala ficou vazia, inicia contagem de auto-destruição
-                if (game.players.length === 0) {
-                    console.log(`Sala ${roomId} vazia. Excluindo em 5 minutos...`);
-                    
-                    game.deleteTimer = setTimeout(() => {
-                        console.log(`Sala ${roomId} expirou e foi excluída.`);
-                        delete games[roomId]; // Apaga da memória
-                    }, 5 * 60 * 1000); // 5 minutos * 60 segundos * 1000ms
-                }
-                
-                break; // Para de procurar (jogador só está em uma sala por vez)
+            // Verifica se esvaziou
+            if (game.players.length === 0) {
+                console.log(`Sala ${roomId} vazia. Excluindo em 5 minutos...`);
+                game.deleteTimer = setTimeout(() => {
+                    console.log(`Sala ${roomId} expirou e foi excluída.`);
+                    delete games[roomId];
+                }, 5 * 60 * 1000);
             }
         }
     });
