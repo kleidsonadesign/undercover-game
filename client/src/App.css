@@ -284,22 +284,28 @@ button {
 
 /* RODAPÉ DO SITE (Fixo na tela) */
 .site-footer {
-  position: fixed; /* Fixa na tela */
-  bottom: 15px;    /* Distância do fundo */
-  left: 0;
-  width: 100%;     /* Ocupa toda a largura */
-  text-align: center;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.6); /* Branco suave */
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Sombra para ler bem no fundo laranja */
-  pointer-events: none; /* Permite clicar através dele se necessário */
-  z-index: 100; /* Garante que fique por cima do background */
+  position: fixed;
+  bottom: 20px;       /* Distância do fundo */
+  left: 25px;         /* Distância da esquerda */
+  width: auto;        /* Ocupa apenas o espaço do texto */
+  text-align: left;   /* Alinhamento à esquerda */
+  
+  font-size: 0.75rem; /* Um pouco menor para ficar discreto */
+  color: rgba(255, 255, 255, 0.5);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); /* Sombra forte para ler no fundo laranja */
+  pointer-events: none;
+  z-index: 100;
   font-family: 'Poppins', sans-serif;
+  
+  /* Um detalhe extra: borda lateral para estilo */
+  border-left: 3px solid #ffd700;
+  padding-left: 10px;
 }
 
 .site-footer strong {
-  color: #ffd700; /* Dourado */
+  color: #ffd700;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: block; /* Joga o nome para a linha de baixo (opcional, fica bonito) */
 }
