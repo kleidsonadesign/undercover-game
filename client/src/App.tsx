@@ -93,10 +93,15 @@ function App() {
     </div>
   );
 
-  // --- COMPONENTE DE RODAPÉ ---
+                                                                                                                                           // --- COMPONENTE DE RODAPÉ ---
+  // --- COMPONENTE DE RODAPÉ (ATUALIZADO COM LINK) ---
   const Footer = () => (
     <div className="site-footer">
-      Desenvolvido e Projetado por <strong>Kleidson Almeida Santos</strong>
+      Desenvolvido e Projetado por 
+      {/* Troque o href abaixo pelo link do seu perfil real */}
+      <a href="kadevpt.vercel.app" target="_blank" rel="noopener noreferrer">
+        <strong>Kleidson Almeida Santos</strong>
+      </a>
     </div>
   );
 
