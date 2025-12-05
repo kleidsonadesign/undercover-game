@@ -278,3 +278,28 @@ button {
   from { transform: rotateX(90deg); opacity: 0; }
   to { transform: rotateX(0); opacity: 1; }
 }
+/* client/src/App.css */
+
+/* ... (mantenha todo o código anterior) ... */
+
+/* RODAPÉ DO SITE (Fixo na tela) */
+.site-footer {
+  position: fixed; /* Fixa na tela */
+  bottom: 15px;    /* Distância do fundo */
+  left: 0;
+  width: 100%;     /* Ocupa toda a largura */
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6); /* Branco suave */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Sombra para ler bem no fundo laranja */
+  pointer-events: none; /* Permite clicar através dele se necessário */
+  z-index: 100; /* Garante que fique por cima do background */
+  font-family: 'Poppins', sans-serif;
+}
+
+.site-footer strong {
+  color: #ffd700; /* Dourado */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
