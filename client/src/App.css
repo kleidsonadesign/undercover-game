@@ -5,50 +5,53 @@
 
 body {
   font-family: 'Poppins', sans-serif;
-  /* Fundo Gradiente Moderno (Dark Blue) */
-  background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+  
+  /* --- MUDANÇA PRINCIPAL: GRADIENTE LARANJA (SUNSET) --- */
+  /* Vai de um laranja avermelhado forte (#ff512f) para um laranja ouro (#f09819) */
+  background: linear-gradient(135deg, #ff512f 0%, #f09819 100%);
+  
   color: white;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow-x: hidden; /* Evita rolagem horizontal em celulares */
+  overflow-x: hidden;
 }
 
-/* Container Principal (Vidro Fosco) */
+/* Container Principal (Vidro Escuro para contraste com o Laranja) */
 .container {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px); /* O efeito de vidro */
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Mudei para preto transparente (antes era branco) para o texto branco ler melhor */
+  background: rgba(0, 0, 0, 0.25); 
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 20px;
   padding: 30px;
   width: 90%;
   max-width: 500px;
   text-align: center;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   animation: fadeIn 0.5s ease-out;
 }
 
-/* Título Principal e Logo */
+/* Título e Logo */
 .game-title {
   font-size: 2rem;
   margin-bottom: 30px;
   letter-spacing: 1px;
-  color: #ffd700;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  color: #ffd700; /* Mantém amarelo para combinar */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   
-  /* Alinhamento da Logo com o Texto */
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 15px;
-  flex-wrap: wrap; /* Para não quebrar em telas muito pequenas */
+  flex-wrap: wrap;
 }
 
 .title-logo {
   height: 60px;
   width: auto;
-  filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
   transition: transform 0.3s;
 }
 
@@ -56,7 +59,7 @@ body {
   transform: scale(1.1) rotate(5deg);
 }
 
-/* Inputs (Caixas de Texto) */
+/* Inputs */
 .input-group {
   margin-bottom: 20px;
   text-align: left;
@@ -65,7 +68,7 @@ body {
 .input-group label {
   display: block;
   font-size: 0.8rem;
-  color: #aaa;
+  color: #ffebcd; /* Um branco meio bege para suavizar */
   margin-bottom: 5px;
   margin-left: 5px;
   font-weight: 600;
@@ -76,8 +79,8 @@ input {
   width: 100%;
   padding: 15px;
   border-radius: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.3); /* Fundo mais escuro para o input */
   color: white;
   font-size: 1.1rem;
   outline: none;
@@ -86,11 +89,11 @@ input {
 
 input:focus {
   border-color: #ffd700;
-  background: rgba(0, 0, 0, 0.6);
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
 }
 
-/* Botões Gerais */
+/* Botões */
 button {
   width: 100%;
   padding: 15px;
@@ -104,11 +107,11 @@ button {
   margin-top: 5px;
 }
 
-/* Botão Amarelo (Destaque) */
+/* Botão Amarelo (Mantido) */
 .btn-primary {
   background-color: #ffd700;
-  color: #1a1a1a;
-  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+  color: #c44d00; /* Texto laranja escuro para contraste no botão amarelo */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .btn-large {
@@ -124,18 +127,18 @@ button {
 }
 
 .btn-primary:disabled {
-  background-color: #444;
-  color: #777;
+  background-color: #555;
+  color: #888;
   cursor: not-allowed;
   box-shadow: none;
 }
 
-/* Botão Vermelho (Votação) */
 .btn-danger {
   background-color: #ff4757;
   color: white;
   margin: 5px 0;
   font-size: 0.9rem;
+  border: 1px solid rgba(0,0,0,0.1);
 }
 .btn-danger:hover { background-color: #ff6b81; transform: scale(1.02); }
 
@@ -147,7 +150,7 @@ button {
   border-radius: 50%;
   font-size: 1.2rem;
   font-weight: bold;
-  background: rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.3);
   color: white;
   border: 1px solid rgba(255,255,255,0.2);
   margin: 0;
@@ -156,20 +159,21 @@ button {
   justify-content: center;
 }
 .btn-small:hover {
-  background: white;
-  color: #333;
+  background: #ffd700;
+  color: #c44d00;
   transform: scale(1.1);
+  border-color: #ffd700;
 }
 
 /* Elementos do Jogo */
 .room-badge {
-  background: rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.3);
   display: inline-block;
   padding: 5px 15px;
   border-radius: 20px;
   font-size: 0.85rem;
   margin-bottom: 15px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
 }
 
 .secret-card {
@@ -179,22 +183,22 @@ button {
   border-radius: 15px;
   font-size: 1.2rem;
   margin: 10px 0 20px 0;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
   border-left: 8px solid #ffd700;
   animation: flipIn 0.6s ease;
 }
 
 .white-role {
-  background: #ff4757; /* Fundo vermelho para Mr White */
+  background: #ff4757;
   color: white;
-  border-left: 8px solid #a30000;
+  border-left: 8px solid #8b0000;
 }
 
 .phase-box {
-  background: rgba(0,0,0,0.3);
+  background: rgba(0,0,0,0.3); /* Mais escuro para contraste */
   padding: 20px;
   border-radius: 15px;
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
   margin-top: 20px;
 }
 
@@ -206,7 +210,7 @@ button {
   border-radius: 10px;
   padding: 5px;
 }
-.player-list li { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.player-list li { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
 
 .descriptions-log {
   max-height: 250px;
@@ -218,13 +222,13 @@ button {
   margin-bottom: 15px;
 }
 
-.player-msg { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.dead { text-decoration: line-through; opacity: 0.5; color: #ff6b81; }
+.player-msg { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.dead { text-decoration: line-through; opacity: 0.6; color: #ffadad; }
 
 /* Grid de Votação */
 .grid-vote {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 2 Colunas */
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-top: 15px;
 }
@@ -245,8 +249,8 @@ button {
 .scoreboard {
   margin-top: 30px;
   font-size: 0.85rem;
-  opacity: 0.8;
-  border-top: 1px solid rgba(255,255,255,0.1);
+  opacity: 0.9;
+  border-top: 1px solid rgba(255,255,255,0.2);
   padding-top: 15px;
 }
 
