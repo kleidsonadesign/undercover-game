@@ -1,0 +1,191 @@
+/* client/src/App.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%); /* Fundo mais dark/moderno */
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 40px;
+  width: 90%;
+  max-width: 480px;
+  text-align: center;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+.game-title {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+/* Estilo dos Inputs na Tela de Login */
+.input-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.8rem;
+  color: #aaa;
+  margin-bottom: 5px;
+  margin-left: 5px;
+  font-weight: 600;
+}
+
+input {
+  width: 100%;
+  padding: 15px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  font-size: 1.1rem;
+  outline: none;
+  transition: 0.3s;
+}
+
+input:focus {
+  border-color: #ffd700;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Botões */
+button {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+.btn-primary {
+  background-color: #ffd700;
+  color: #1a1a1a;
+  margin-top: 10px;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+}
+
+.btn-large {
+  font-size: 1.3rem;
+  padding: 20px;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #ffea00;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+}
+
+.btn-primary:disabled {
+  background-color: #555;
+  color: #888;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  background-color: #ff4757;
+  color: white;
+  margin: 5px 0;
+}
+
+/* Listas e Logs */
+.player-list {
+  list-style: none;
+  margin: 20px 0;
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+  padding: 10px;
+}
+.player-list li { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+.secret-card {
+  background: #fff;
+  color: #333;
+  padding: 20px;
+  border-radius: 15px;
+  font-size: 1.2rem;
+  margin: 20px 0;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.white-role {
+  background: #ff4757;
+  color: white;
+}
+
+.phase-box {
+  background: rgba(0,0,0,0.2);
+  padding: 20px;
+  border-radius: 15px;
+  border: 1px solid rgba(255,255,255,0.05);
+  margin-top: 20px;
+}
+
+.descriptions-log {
+  max-height: 250px;
+  overflow-y: auto;
+  text-align: left;
+  background: rgba(0,0,0,0.3);
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.player-msg { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.dead { text-decoration: line-through; opacity: 0.5; color: #ff6b81; }
+
+.grid-vote {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.reveal-box {
+  background: rgba(255,255,255,0.1);
+  padding: 15px;
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+.scoreboard {
+  margin-top: 30px;
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.score-list {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.room-badge {
+  background: rgba(255,255,255,0.1);
+  display: inline-block;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
