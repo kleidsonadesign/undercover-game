@@ -345,11 +345,22 @@ button {
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.5);
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-  pointer-events: none;
-  z-index: 100;
   
+  /* MUDANÇA: Agora ele aceita cliques normalmente */
+  pointer-events: auto; 
+  cursor: default; /* Cursor padrão no texto */
+  
+  z-index: 100;
   border-left: 3px solid #ffd700;
   padding-left: 10px;
+}
+
+/* Estilo do Link */
+.site-footer a {
+  text-decoration: none;
+  cursor: pointer; /* Mãozinha apenas no link */
+  color: inherit;  /* Herda a cor do pai */
+  display: block;  /* Ocupa a linha inteira */
 }
 
 .site-footer strong {
@@ -357,7 +368,14 @@ button {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  display: block; /* Nome na linha de baixo */
+  transition: all 0.3s ease;
+}
+
+/* Efeito ao passar o mouse */
+.site-footer a:hover strong {
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+  transform: translateX(5px);
 }
 
 /* Animações */
