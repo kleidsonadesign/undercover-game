@@ -78,35 +78,42 @@ function App() {
   // --- TELA DE LOGIN (ENTRADA) ---
   if (!joined) {
     return (
-      <div className="container login-screen">
-        {/* Título Personalizado com Logo */}
-        <h1 className="game-title">
-          <img src="/spylogo.png" alt="Logo Spy" className="title-logo" />
-          SPY & WHITE GAME
-        </h1>
-        
-        <div className="input-group">
-          <label>SEU APELIDO</label>
-          <input 
-            placeholder="Ex: João" 
-            value={playerName} 
-            onChange={(e) => setPlayerName(e.target.value)} 
-          />
+      <>
+        <div className="container login-screen">
+          {/* Título Personalizado com Logo */}
+          <h1 className="game-title">
+            <img src="/spylogo.png" alt="Logo Spy" className="title-logo" />
+            SPY & WHITE GAME
+          </h1>
+          
+          <div className="input-group">
+            <label>SEU APELIDO</label>
+            <input 
+              placeholder="Ex: João" 
+              value={playerName} 
+              onChange={(e) => setPlayerName(e.target.value)} 
+            />
+          </div>
+
+          <div className="input-group">
+            <label>NOME DA SALA</label>
+            <input 
+              placeholder="Ex: Batata" 
+              value={roomId} 
+              onChange={(e) => setRoomId(e.target.value)} 
+            />
+          </div>
+          
+          <button className="btn-primary btn-large" onClick={joinRoom}>
+            ENTRAR NA SALA
+          </button>
         </div>
 
-        <div className="input-group">
-          <label>NOME DA SALA</label>
-          <input 
-            placeholder="Ex: Batata" 
-            value={roomId} 
-            onChange={(e) => setRoomId(e.target.value)} 
-          />
+        {/* RODAPÉ FIXO (FORA DO CONTAINER) */}
+        <div className="site-footer">
+          Desenvolvido e Projetado por <strong>Kleidson Almeida Santos</strong>
         </div>
-        
-        <button className="btn-primary btn-large" onClick={joinRoom}>
-          ENTRAR NA SALA
-        </button>
-      </div>
+      </>
     );
   }
 
@@ -121,162 +128,169 @@ function App() {
 
   // --- JOGO PRINCIPAL ---
   return (
-    <div className="container">
-      <header>
-        <div className="room-badge">Sala: {roomId}</div>
-        {gameState.phase !== 'LOBBY' && (
-          <div className={`secret-card ${me.role === 'mr_white' ? 'white-role' : ''}`}>
-             {me.role === 'mr_white' 
-                ? <span>VOCÊ É O SR. BRANCO! 🤫</span> 
-                : <span>Sua palavra: <strong>{me.word}</strong></span>
-             }
+    <>
+      <div className="container">
+        <header>
+          <div className="room-badge">Sala: {roomId}</div>
+          {gameState.phase !== 'LOBBY' && (
+            <div className={`secret-card ${me.role === 'mr_white' ? 'white-role' : ''}`}>
+               {me.role === 'mr_white' 
+                  ? <span>VOCÊ É O SR. BRANCO! 🤫</span> 
+                  : <span>Sua palavra: <strong>{me.word}</strong></span>
+               }
+            </div>
+          )}
+        </header>
+
+        {/* LOBBY (SALA DE ESPERA) */}
+        {gameState.phase === 'LOBBY' && (
+          <div className="phase-box">
+            <h2>Quem vai jogar? ({gameState.players.length})</h2>
+            <ul className="player-list">
+              {gameState.players.map(p => (
+                  <li key={p.id}>
+                      {p.name} {p.id === socket.id && ' (Você)'}
+                  </li>
+              ))}
+            </ul>
+            
+            {/* ÁREA DE CONFIGURAÇÃO (Visível para todos) */}
+            <div className="settings-box" style={{margin: '20px 0', padding: '15px', background: 'rgba(0,0,0,0.3)', borderRadius: '10px'}}>
+               <h3>Configurar Partida</h3>
+               
+               <div className="setting-row" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}}>
+                 <span>⚪ Sr. Branco:</span>
+                 <div className="controls">
+                   <button className="btn-small" onClick={() => changeSettings('mrWhiteCount', -1)}>-</button>
+                   <span style={{margin: '0 10px', fontSize: '1.2em', fontWeight: 'bold'}}>{gameState.settings?.mrWhiteCount || 0}</span>
+                   <button className="btn-small" onClick={() => changeSettings('mrWhiteCount', 1)}>+</button>
+                 </div>
+               </div>
+
+               <div className="setting-row" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                 <span>🕵️‍♂️ Espiões:</span>
+                 <div className="controls">
+                   <button className="btn-small" onClick={() => changeSettings('undercoverCount', -1)}>-</button>
+                   <span style={{margin: '0 10px', fontSize: '1.2em', fontWeight: 'bold'}}>{gameState.settings?.undercoverCount || 0}</span>
+                   <button className="btn-small" onClick={() => changeSettings('undercoverCount', 1)}>+</button>
+                 </div>
+               </div>
+               
+               <p style={{fontSize: '0.8em', marginTop: '15px', color: '#ccc'}}>
+                  Total de Inimigos: {(gameState.settings?.mrWhiteCount || 0) + (gameState.settings?.undercoverCount || 0)} 
+                  <br/> (O restante dos jogadores serão Civis)
+               </p>
+            </div>
+
+            <button 
+              className="btn-primary" 
+              onClick={startGame} 
+              disabled={gameState.players.length < 3}
+            >
+              {gameState.players.length < 3 ? 'Aguardando Jogadores (Min 3)...' : 'COMEÇAR PARTIDA AGORA'}
+            </button>
           </div>
         )}
-      </header>
 
-      {/* LOBBY (SALA DE ESPERA) */}
-      {gameState.phase === 'LOBBY' && (
-        <div className="phase-box">
-          <h2>Quem vai jogar? ({gameState.players.length})</h2>
-          <ul className="player-list">
-            {gameState.players.map(p => (
-                <li key={p.id}>
-                    {p.name} {p.id === socket.id && ' (Você)'}
-                </li>
-            ))}
-          </ul>
-          
-          {/* ÁREA DE CONFIGURAÇÃO (Visível para todos) */}
-          <div className="settings-box" style={{margin: '20px 0', padding: '15px', background: 'rgba(0,0,0,0.3)', borderRadius: '10px'}}>
-             <h3>Configurar Partida</h3>
-             
-             <div className="setting-row" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}}>
-               <span>⚪ Sr. Branco:</span>
-               <div className="controls">
-                 <button className="btn-small" onClick={() => changeSettings('mrWhiteCount', -1)}>-</button>
-                 <span style={{margin: '0 10px', fontSize: '1.2em', fontWeight: 'bold'}}>{gameState.settings?.mrWhiteCount || 0}</span>
-                 <button className="btn-small" onClick={() => changeSettings('mrWhiteCount', 1)}>+</button>
-               </div>
-             </div>
-
-             <div className="setting-row" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-               <span>🕵️‍♂️ Espiões:</span>
-               <div className="controls">
-                 <button className="btn-small" onClick={() => changeSettings('undercoverCount', -1)}>-</button>
-                 <span style={{margin: '0 10px', fontSize: '1.2em', fontWeight: 'bold'}}>{gameState.settings?.undercoverCount || 0}</span>
-                 <button className="btn-small" onClick={() => changeSettings('undercoverCount', 1)}>+</button>
-               </div>
-             </div>
-             
-             <p style={{fontSize: '0.8em', marginTop: '15px', color: '#ccc'}}>
-                Total de Inimigos: {(gameState.settings?.mrWhiteCount || 0) + (gameState.settings?.undercoverCount || 0)} 
-                <br/> (O restante dos jogadores serão Civis)
-             </p>
-          </div>
-
-          <button 
-            className="btn-primary" 
-            onClick={startGame} 
-            disabled={gameState.players.length < 3}
-          >
-            {gameState.players.length < 3 ? 'Aguardando Jogadores (Min 3)...' : 'COMEÇAR PARTIDA AGORA'}
-          </button>
-        </div>
-      )}
-
-      {/* FASE DE DESCRIÇÃO */}
-      {gameState.phase === 'DESCRIPTION' && (
-        <div className="phase-box">
-          <h3>📢 Hora da Descrição</h3>
-          <p>Vez de: <strong style={{color: '#ffd700'}}>{currentPlayer?.name}</strong></p>
-          
-          <div className="descriptions-log">
-             {gameState.players.map(p => (
-               <div key={p.id} className={`player-msg ${!p.isAlive ? 'dead' : ''}`}>
-                 <strong>{p.name}:</strong> {p.description ? `"${p.description}"` : '...'}
-               </div>
-             ))}
-          </div>
-
-          {isMyTurn && me.isAlive && (
-            <div className="action-area">
-              <input 
-                autoFocus
-                value={descriptionInput} 
-                onChange={(e) => setDescriptionInput(e.target.value)} 
-                placeholder="Descreva sua palavra com 1 termo..."
-              />
-              <button className="btn-primary" onClick={sendDescription}>ENVIAR</button>
+        {/* FASE DE DESCRIÇÃO */}
+        {gameState.phase === 'DESCRIPTION' && (
+          <div className="phase-box">
+            <h3>📢 Hora da Descrição</h3>
+            <p>Vez de: <strong style={{color: '#ffd700'}}>{currentPlayer?.name}</strong></p>
+            
+            <div className="descriptions-log">
+               {gameState.players.map(p => (
+                 <div key={p.id} className={`player-msg ${!p.isAlive ? 'dead' : ''}`}>
+                   <strong>{p.name}:</strong> {p.description ? `"${p.description}"` : '...'}
+                 </div>
+               ))}
             </div>
-          )}
-        </div>
-      )}
 
-      {/* FASE DE VOTAÇÃO */}
-      {gameState.phase === 'VOTING' && (
-        <div className="phase-box">
-          <h3 style={{color: '#ff4757'}}>☠️ Eliminação</h3>
-          <p>Clique em quem você suspeita:</p>
-          <div className="grid-vote">
-            {gameState.players.map(p => (
-              p.isAlive && p.id !== socket.id && (
-                <button key={p.id} className="btn-danger" onClick={() => votePlayer(p.id)}>
-                   {p.name}
-                </button>
-              )
-            ))}
-          </div>
-          <p style={{fontSize: '0.8em', marginTop: '10px'}}>Seus votos recebidos: {me.votes}</p>
-        </div>
-      )}
-
-      {/* CHANCE DO MR WHITE */}
-      {gameState.phase === 'MR_WHITE_GUESS' && (
-        <div className="phase-box">
-          <h3 style={{color: '#ffd700'}}>Sr. Branco Encurralado!</h3>
-          <p>Ele tem uma chance de adivinhar.</p>
-          {me.role === 'mr_white' && !me.isAlive && (
-             <div className="action-area">
-               <input 
+            {isMyTurn && me.isAlive && (
+              <div className="action-area">
+                <input 
                   autoFocus
-                  placeholder="Qual é a palavra dos civis?" 
-                  value={mrWhiteGuess} 
-                  onChange={(e) => setMrWhiteGuess(e.target.value)} 
-               />
-               <button className="btn-primary" onClick={sendMrWhiteGuess}>TENTAR SALVAR</button>
-             </div>
-          )}
-        </div>
-      )}
-
-      {/* FIM DE JOGO */}
-      {gameState.phase === 'GAME_OVER' && (
-        <div className="phase-box">
-          <h1>🏆 Fim de Jogo!</h1>
-          
-          <h2 style={{color: '#ffd700'}}>
-            {gameState.winner === 'CIVILIANS_WIN' && 'Civis Venceram!'}
-            {gameState.winner === 'IMPOSTORS_WIN' && 'Impostores Venceram!'}
-            {gameState.winner === 'MR_WHITE_WINS' && 'Sr. Branco Venceu!'}
-          </h2>
-
-          {gameState.wordPair && (
-            <div className="reveal-box">
-              <p>Civis: <strong>{gameState.wordPair.civilian}</strong></p>
-              <p>Impostor: <strong>{gameState.wordPair.undercover}</strong></p>
-            </div>
-          )}
-          <button className="btn-primary" onClick={startGame}>JOGAR NOVAMENTE</button>
-        </div>
-      )}
-      
-      <div className="scoreboard">
-          <h4>Placar</h4>
-          <div className="score-list">
-            {gameState.players.map(p => <span key={p.id}>{p.name}: <strong>{p.score}</strong></span>)}
+                  value={descriptionInput} 
+                  onChange={(e) => setDescriptionInput(e.target.value)} 
+                  placeholder="Descreva sua palavra com 1 termo..."
+                />
+                <button className="btn-primary" onClick={sendDescription}>ENVIAR</button>
+              </div>
+            )}
           </div>
+        )}
+
+        {/* FASE DE VOTAÇÃO */}
+        {gameState.phase === 'VOTING' && (
+          <div className="phase-box">
+            <h3 style={{color: '#ff4757'}}>☠️ Eliminação</h3>
+            <p>Clique em quem você suspeita:</p>
+            <div className="grid-vote">
+              {gameState.players.map(p => (
+                p.isAlive && p.id !== socket.id && (
+                  <button key={p.id} className="btn-danger" onClick={() => votePlayer(p.id)}>
+                     {p.name}
+                  </button>
+                )
+              ))}
+            </div>
+            <p style={{fontSize: '0.8em', marginTop: '10px'}}>Seus votos recebidos: {me.votes}</p>
+          </div>
+        )}
+
+        {/* CHANCE DO MR WHITE */}
+        {gameState.phase === 'MR_WHITE_GUESS' && (
+          <div className="phase-box">
+            <h3 style={{color: '#ffd700'}}>Sr. Branco Encurralado!</h3>
+            <p>Ele tem uma chance de adivinhar.</p>
+            {me.role === 'mr_white' && !me.isAlive && (
+               <div className="action-area">
+                 <input 
+                    autoFocus
+                    placeholder="Qual é a palavra dos civis?" 
+                    value={mrWhiteGuess} 
+                    onChange={(e) => setMrWhiteGuess(e.target.value)} 
+                 />
+                 <button className="btn-primary" onClick={sendMrWhiteGuess}>TENTAR SALVAR</button>
+               </div>
+            )}
+          </div>
+        )}
+
+        {/* FIM DE JOGO */}
+        {gameState.phase === 'GAME_OVER' && (
+          <div className="phase-box">
+            <h1>🏆 Fim de Jogo!</h1>
+            
+            <h2 style={{color: '#ffd700'}}>
+              {gameState.winner === 'CIVILIANS_WIN' && 'Civis Venceram!'}
+              {gameState.winner === 'IMPOSTORS_WIN' && 'Impostores Venceram!'}
+              {gameState.winner === 'MR_WHITE_WINS' && 'Sr. Branco Venceu!'}
+            </h2>
+
+            {gameState.wordPair && (
+              <div className="reveal-box">
+                <p>Civis: <strong>{gameState.wordPair.civilian}</strong></p>
+                <p>Impostor: <strong>{gameState.wordPair.undercover}</strong></p>
+              </div>
+            )}
+            <button className="btn-primary" onClick={startGame}>JOGAR NOVAMENTE</button>
+          </div>
+        )}
+        
+        <div className="scoreboard">
+            <h4>Placar</h4>
+            <div className="score-list">
+              {gameState.players.map(p => <span key={p.id}>{p.name}: <strong>{p.score}</strong></span>)}
+            </div>
+        </div>
       </div>
-    </div>
+
+      {/* RODAPÉ FIXO (FORA DO CONTAINER) */}
+      <div className="site-footer">
+        Desenvolvido e Projetado por <strong>Kleidson Almeida Santos</strong>
+      </div>
+    </>
   );
 }
 
