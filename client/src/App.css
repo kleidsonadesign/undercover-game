@@ -39,6 +39,7 @@ body {
   text-align: center;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
   animation: fadeIn 0.5s ease-out;
+  margin-bottom: 50px; /* Espaço para não bater no rodapé em telas pequenas */
 }
 
 /* Título e Logo */
@@ -129,7 +130,7 @@ button {
 .btn-primary:hover:not(:disabled) {
   background-color: #ffea00;
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(255, 165, 0, 0.4); /* Brilho laranja ao passar o mouse */
+  box-shadow: 0 8px 25px rgba(255, 165, 0, 0.4);
 }
 
 .btn-primary:disabled {
@@ -268,36 +269,77 @@ button {
   margin-top: 10px;
 }
 
-/* Animações */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+/* --- REGRAS DO JOGO (Expansível) --- */
+.rules-box {
+  position: fixed;
+  bottom: 80px;  /* Acima do rodapé */
+  left: 25px;
+  width: 300px;
+  max-height: 40px; /* Fechado */
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(5px);
+  border-left: 3px solid #ffd700;
+  border-radius: 10px;
+  padding: 10px;
+  overflow: hidden;
+  transition: all 0.4s ease-in-out;
+  color: white;
+  z-index: 90;
+  cursor: help;
+  font-size: 0.8rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-@keyframes flipIn {
-  from { transform: rotateX(90deg); opacity: 0; }
-  to { transform: rotateX(0); opacity: 1; }
+.rules-box:hover {
+  max-height: 420px; /* Aberto */
+  background: rgba(0, 0, 0, 0.9);
+  width: 320px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-left: 3px solid #ffd700;
 }
-/* client/src/App.css */
 
-/* ... (mantenha todo o código anterior) ... */
+.rules-box h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #ffd700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 15px;
+}
 
-/* RODAPÉ DO SITE (Fixo na tela) */
+.rules-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  opacity: 0.9;
+}
+
+.rules-list li {
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.rules-list em {
+  color: #ff6b6b;
+  font-style: normal;
+  font-weight: bold;
+}
+
+/* --- RODAPÉ FIXO (Canto Esquerdo) --- */
 .site-footer {
   position: fixed;
-  bottom: 20px;       /* Distância do fundo */
-  left: 25px;         /* Distância da esquerda */
-  width: auto;        /* Ocupa apenas o espaço do texto */
-  text-align: left;   /* Alinhamento à esquerda */
+  bottom: 20px;
+  left: 25px;
+  width: auto;
+  text-align: left;
   
-  font-size: 0.75rem; /* Um pouco menor para ficar discreto */
+  font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.5);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); /* Sombra forte para ler no fundo laranja */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
   pointer-events: none;
   z-index: 100;
-  font-family: 'Poppins', sans-serif;
   
-  /* Um detalhe extra: borda lateral para estilo */
   border-left: 3px solid #ffd700;
   padding-left: 10px;
 }
@@ -307,5 +349,16 @@ button {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  display: block; /* Joga o nome para a linha de baixo (opcional, fica bonito) */
+  display: block;
+}
+
+/* Animações */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes flipIn {
+  from { transform: rotateX(90deg); opacity: 0; }
+  to { transform: rotateX(0); opacity: 1; }
 }
