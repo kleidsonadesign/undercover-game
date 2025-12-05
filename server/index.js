@@ -13,12 +13,11 @@ app.use(cors());
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: { 
-        origin: "*", // Permite conexões de qualquer lugar (Vercel/Localhost)
+        origin: "*", 
         methods: ["GET", "POST"] 
     }
 });
 
-// Armazena o estado de todas as salas
 let games = {}; 
 
 io.on('connection', (socket) => {
@@ -28,6 +27,7 @@ io.on('connection', (socket) => {
     socket.on('join_room', ({ roomId, playerName }) => {
         socket.join(roomId);
 
+        // Se a sala não existe, cria
         if (!games[roomId]) {
             games[roomId] = {
                 id: roomId,
@@ -36,13 +36,23 @@ io.on('connection', (socket) => {
                 wordPair: {},
                 turnIndex: 0,
                 winner: null,
-                usedIndices: [], // Histórico de palavras
-                // Configurações Padrão (1 Mr White, 1 Undercover)
+                usedIndices: [],
                 settings: {
                     mrWhiteCount: 1,
                     undercoverCount: 1
-                }
+                },
+                deleteTimer: null // <--- NOVO: Controle do timer de exclusão
             };
+        }
+
+        const game = games[roomId];
+
+        // --- LÓGICA DE CANCELAR EXCLUSÃO ---
+        // Se a sala estava marcada para ser deletada (estava vazia), cancela!
+        if (game.deleteTimer) {
+            console.log(`Sala ${roomId}: Exclusão cancelada (alguém entrou).`);
+            clearTimeout(game.deleteTimer);
+            game.deleteTimer = null;
         }
 
         const newPlayer = {
@@ -56,34 +66,35 @@ io.on('connection', (socket) => {
             description: ""
         };
 
-        games[roomId].players.push(newPlayer);
-        io.to(roomId).emit('update_game', games[roomId]);
+        game.players.push(newPlayer);
+        io.to(roomId).emit('update_game', game);
     });
 
-    // 2. Alterar Configurações (Botões + e - no Lobby)
+    // ... (MANTENHA OS EVENTOS change_settings, start_game, send_description, vote_player, mr_white_guess IGUAIS) ...
+    // Vou omitir aqui para não ficar gigante, mas você DEVE manter o código que já tinha dessas funções.
+    // O que muda é apenas o join_room (acima) e o disconnect (abaixo).
+    
+    // CASO PRECISE, COPIE E COLE AS FUNÇÕES INTERMEDIÁRIAS DO CÓDIGO ANTERIOR AQUI
+    // (change_settings, start_game, send_description, vote_player, mr_white_guess)
+    
+    // --- REPETINDO O CÓDIGO INTERMEDIÁRIO PARA FACILITAR SUA VIDA ---
     socket.on('change_settings', ({ roomId, setting, change }) => {
         const game = games[roomId];
         if (!game || game.phase !== 'LOBBY') return;
-
         let newValue = game.settings[setting] + change;
-        if (newValue < 0) newValue = 0; // Não pode ser negativo
-
+        if (newValue < 0) newValue = 0;
         game.settings[setting] = newValue;
         io.to(roomId).emit('update_game', game);
     });
 
-    // 3. Iniciar Jogo
     socket.on('start_game', (roomId) => {
         const game = games[roomId];
-        // Trava de segurança: só inicia se estiver no Lobby e tiver gente suficiente
         if (!game || game.players.length < 3 || game.phase !== 'LOBBY') return;
 
-        // --- DEFINIÇÃO DE PAPÉIS (BASEADO NA CONFIGURAÇÃO) ---
         const totalPlayers = game.players.length;
         let countMrWhite = game.settings.mrWhiteCount;
         let countUndercover = game.settings.undercoverCount;
 
-        // Validação de Segurança: Se a soma de inimigos for >= total de jogadores, reseta.
         if ((countMrWhite + countUndercover) >= totalPlayers) {
             countMrWhite = 1;
             countUndercover = Math.max(0, Math.floor((totalPlayers - 2) / 2));
@@ -94,22 +105,16 @@ io.on('connection', (socket) => {
         for (let i = 0; i < countUndercover; i++) roles.push('undercover');
         while (roles.length < totalPlayers) roles.push('civilian');
 
-        // Embaralha os papéis
         roles.sort(() => Math.random() - 0.5);
-        // -----------------------------------------------------
 
-        // Configura a fase inicial
         game.phase = 'DESCRIPTION';
         game.turnIndex = 0;
         game.winner = null;
         
-        // --- SORTEIO DE PALAVRAS (SEM REPETIÇÃO) ---
         let availableIndices = [];
         for (let i = 0; i < wordDatabase.length; i++) {
             if (!game.usedIndices.includes(i)) availableIndices.push(i);
         }
-        
-        // Se acabaram as palavras, reseta o histórico
         if (availableIndices.length === 0) {
             game.usedIndices = [];
             for (let i = 0; i < wordDatabase.length; i++) availableIndices.push(i);
@@ -119,9 +124,7 @@ io.on('connection', (socket) => {
         const selectedIndex = availableIndices[randomIndexPos];
         game.wordPair = wordDatabase[selectedIndex];
         game.usedIndices.push(selectedIndex);
-        // -------------------------------------------
 
-        // Atribui papéis e palavras aos jogadores
         game.players.forEach((player, index) => {
             player.role = roles[index];
             player.isAlive = true;
@@ -130,90 +133,53 @@ io.on('connection', (socket) => {
             
             if (player.role === 'civilian') player.word = game.wordPair.civilian;
             else if (player.role === 'undercover') player.word = game.wordPair.undercover;
-            else player.word = null; // Mr. White não vê nada
+            else player.word = null;
         });
 
-        // --- DEFINIR ORDEM DE TURNOS ---
-        
-        // 1. Embaralha aleatoriamente
         game.players.sort(() => Math.random() - 0.5);
-
-        // 2. REGRA DE OURO: Mr. White NÃO pode ser o primeiro
-        // Se o primeiro sorteado for Mr. White, joga ele pro final da fila
-        // O while garante que se tiver 2 Mr. Whites, ele joga ambos pro final até achar um civil/undercover
         while (game.players[0].role === 'mr_white') {
-            const firstPlayer = game.players.shift(); // Remove o primeiro
-            game.players.push(firstPlayer);           // Adiciona no final
+            const firstPlayer = game.players.shift();
+            game.players.push(firstPlayer);
         }
 
         io.to(roomId).emit('update_game', game);
     });
 
-    // 4. Receber Descrição
     socket.on('send_description', ({ roomId, text }) => {
         const game = games[roomId];
         if (!game) return;
-
         const currentPlayer = game.players[game.turnIndex];
-        
-        // Só aceita se for a vez de quem enviou
         if (currentPlayer.id === socket.id) {
             currentPlayer.description = text;
-            
-            // Passa para o próximo vivo
             let nextIndex = game.turnIndex + 1;
-            while (nextIndex < game.players.length && !game.players[nextIndex].isAlive) {
-                nextIndex++;
-            }
-
-            if (nextIndex >= game.players.length) {
-                game.phase = 'VOTING'; // Todos falaram
-            } else {
-                game.turnIndex = nextIndex;
-            }
+            while (nextIndex < game.players.length && !game.players[nextIndex].isAlive) nextIndex++;
+            if (nextIndex >= game.players.length) game.phase = 'VOTING';
+            else game.turnIndex = nextIndex;
             io.to(roomId).emit('update_game', game);
         }
     });
 
-    // 5. Votação
     socket.on('vote_player', ({ roomId, targetId }) => {
         const game = games[roomId];
         if (!game) return;
-
         const target = game.players.find(p => p.id === targetId);
         if (target) target.votes += 1;
-
-        // Verifica total de votos vs jogadores vivos
         const totalVotes = game.players.reduce((acc, p) => acc + p.votes, 0);
         const aliveCount = game.players.filter(p => p.isAlive).length;
-
         if (totalVotes >= aliveCount) {
-            // Elimina o mais votado
-            const eliminated = game.players.reduce((prev, current) => 
-                (prev.votes > current.votes) ? prev : current
-            );
-
+            const eliminated = game.players.reduce((prev, current) => (prev.votes > current.votes) ? prev : current);
             eliminated.isAlive = false;
-
-            // Se for Mr. White, dá a chance de adivinhar
             if (eliminated.role === 'mr_white') {
                 game.phase = 'MR_WHITE_GUESS';
                 io.to(roomId).emit('update_game', game);
                 return;
             }
-
             checkWinCondition(game, roomId);
-            
-            // Se o jogo continua, prepara nova rodada
             if (game.phase !== 'GAME_OVER' && game.phase !== 'MR_WHITE_GUESS') {
                 game.players.forEach(p => { p.votes = 0; p.description = ""; });
                 game.phase = 'DESCRIPTION';
-                
-                // Reinicia turnos (apenas vivos) e garante que Mr White (se houver outro) não inicie
-                // (Opcional: re-embaralhar ou manter ordem. Aqui mantemos a ordem original dos vivos)
                 game.turnIndex = 0;
                 while (!game.players[game.turnIndex].isAlive) game.turnIndex++;
-                
                 io.to(roomId).emit('update_game', game);
             }
         } else {
@@ -221,39 +187,57 @@ io.on('connection', (socket) => {
         }
     });
 
-    // 6. Mr. White Adivinha
     socket.on('mr_white_guess', ({ roomId, guess }) => {
         const game = games[roomId];
         if (!game) return;
-
         const correctWord = game.wordPair.civilian.toLowerCase();
-        const cleanGuess = guess.toLowerCase().trim();
-
-        if (cleanGuess === correctWord) {
-            endGame(game, 'MR_WHITE_WINS');
-        } else {
-            checkWinCondition(game, roomId);
-        }
+        if (guess.toLowerCase().trim() === correctWord) endGame(game, 'MR_WHITE_WINS');
+        else checkWinCondition(game, roomId);
         io.to(roomId).emit('update_game', game);
+    });
+
+    // --- NOVA LÓGICA DE DESCONEXÃO E LIMPEZA ---
+    socket.on('disconnect', () => {
+        console.log(`Jogador desconectado: ${socket.id}`);
+        
+        // Procura em qual sala o jogador estava
+        for (const roomId in games) {
+            const game = games[roomId];
+            const playerIndex = game.players.findIndex(p => p.id === socket.id);
+
+            if (playerIndex !== -1) {
+                // Remove o jogador da lista
+                game.players.splice(playerIndex, 1);
+                
+                // Avisa os outros que ele saiu
+                io.to(roomId).emit('update_game', game);
+
+                // Se a sala ficou vazia, inicia contagem de auto-destruição
+                if (game.players.length === 0) {
+                    console.log(`Sala ${roomId} vazia. Excluindo em 5 minutos...`);
+                    
+                    game.deleteTimer = setTimeout(() => {
+                        console.log(`Sala ${roomId} expirou e foi excluída.`);
+                        delete games[roomId]; // Apaga da memória
+                    }, 5 * 60 * 1000); // 5 minutos * 60 segundos * 1000ms
+                }
+                
+                break; // Para de procurar (jogador só está em uma sala por vez)
+            }
+        }
     });
 });
 
 function checkWinCondition(game, roomId) {
     const civiliansAlive = game.players.filter(p => p.role === 'civilian' && p.isAlive).length;
     const impostorsAlive = game.players.filter(p => (p.role === 'undercover' || p.role === 'mr_white') && p.isAlive).length;
-
-    if (impostorsAlive === 0) {
-        endGame(game, 'CIVILIANS_WIN');
-    } else if (impostorsAlive >= civiliansAlive) {
-        endGame(game, 'IMPOSTORS_WIN');
-    }
+    if (impostorsAlive === 0) endGame(game, 'CIVILIANS_WIN');
+    else if (impostorsAlive >= civiliansAlive) endGame(game, 'IMPOSTORS_WIN');
 }
 
 function endGame(game, result) {
     game.phase = 'GAME_OVER';
     game.winner = result;
-    
-    // Pontuação
     game.players.forEach(p => {
         if (result === 'CIVILIANS_WIN' && p.role === 'civilian') p.score += 2;
         if (result === 'MR_WHITE_WINS' && p.role === 'mr_white') p.score += 6;
