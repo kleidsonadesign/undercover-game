@@ -189,3 +189,19 @@ button {
   font-size: 0.9rem;
   margin-bottom: 10px;
 }
+.btn-small {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.3);
+  margin: 0;
+}
+.btn-small:hover {
+  background: white;
+  color: #333;
+}
