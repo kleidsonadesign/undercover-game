@@ -5,35 +5,58 @@
 
 body {
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%); /* Fundo mais dark/moderno */
+  /* Fundo Gradiente Moderno (Dark Blue) */
+  background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
   color: white;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow-x: hidden; /* Evita rolagem horizontal em celulares */
 }
 
+/* Container Principal (Vidro Fosco) */
 .container {
   background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px); /* O efeito de vidro */
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
-  padding: 40px;
+  padding: 30px;
   width: 90%;
-  max-width: 480px;
+  max-width: 500px;
   text-align: center;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.5s ease-out;
 }
 
+/* Título Principal e Logo */
 .game-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
   margin-bottom: 30px;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   color: #ffd700;
   text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  
+  /* Alinhamento da Logo com o Texto */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap; /* Para não quebrar em telas muito pequenas */
 }
 
-/* Estilo dos Inputs na Tela de Login */
+.title-logo {
+  height: 60px;
+  width: auto;
+  filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5));
+  transition: transform 0.3s;
+}
+
+.title-logo:hover {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* Inputs (Caixas de Texto) */
 .input-group {
   margin-bottom: 20px;
   text-align: left;
@@ -46,6 +69,7 @@ body {
   margin-bottom: 5px;
   margin-left: 5px;
   font-weight: 600;
+  text-transform: uppercase;
 }
 
 input {
@@ -62,10 +86,11 @@ input {
 
 input:focus {
   border-color: #ffd700;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
 }
 
-/* Botões */
+/* Botões Gerais */
 button {
   width: 100%;
   padding: 15px;
@@ -74,20 +99,22 @@ button {
   font-size: 1rem;
   font-weight: 800;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   text-transform: uppercase;
+  margin-top: 5px;
 }
 
+/* Botão Amarelo (Destaque) */
 .btn-primary {
   background-color: #ffd700;
   color: #1a1a1a;
-  margin-top: 10px;
   box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
 }
 
 .btn-large {
-  font-size: 1.3rem;
-  padding: 20px;
+  font-size: 1.2rem;
+  padding: 18px;
+  margin-top: 20px;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -97,26 +124,53 @@ button {
 }
 
 .btn-primary:disabled {
-  background-color: #555;
-  color: #888;
+  background-color: #444;
+  color: #777;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
+/* Botão Vermelho (Votação) */
 .btn-danger {
   background-color: #ff4757;
   color: white;
   margin: 5px 0;
+  font-size: 0.9rem;
+}
+.btn-danger:hover { background-color: #ff6b81; transform: scale(1.02); }
+
+/* Botões Pequenos (+ e -) */
+.btn-small {
+  width: 35px;
+  height: 35px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-small:hover {
+  background: white;
+  color: #333;
+  transform: scale(1.1);
 }
 
-/* Listas e Logs */
-.player-list {
-  list-style: none;
-  margin: 20px 0;
-  background: rgba(0,0,0,0.2);
-  border-radius: 10px;
-  padding: 10px;
+/* Elementos do Jogo */
+.room-badge {
+  background: rgba(255,255,255,0.1);
+  display: inline-block;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  margin-bottom: 15px;
+  border: 1px solid rgba(255,255,255,0.1);
 }
-.player-list li { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
 .secret-card {
   background: #fff;
@@ -124,22 +178,35 @@ button {
   padding: 20px;
   border-radius: 15px;
   font-size: 1.2rem;
-  margin: 20px 0;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  margin: 10px 0 20px 0;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  border-left: 8px solid #ffd700;
+  animation: flipIn 0.6s ease;
 }
 
 .white-role {
-  background: #ff4757;
+  background: #ff4757; /* Fundo vermelho para Mr White */
   color: white;
+  border-left: 8px solid #a30000;
 }
 
 .phase-box {
-  background: rgba(0,0,0,0.2);
+  background: rgba(0,0,0,0.3);
   padding: 20px;
   border-radius: 15px;
   border: 1px solid rgba(255,255,255,0.05);
   margin-top: 20px;
 }
+
+/* Listas e Logs */
+.player-list {
+  list-style: none;
+  margin: 15px 0;
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+  padding: 5px;
+}
+.player-list li { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
 .descriptions-log {
   max-height: 250px;
@@ -154,24 +221,33 @@ button {
 .player-msg { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .dead { text-decoration: line-through; opacity: 0.5; color: #ff6b81; }
 
+/* Grid de Votação */
 .grid-vote {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr; /* 2 Colunas */
   gap: 10px;
   margin-top: 15px;
 }
 
+/* Configurações (Lobby) */
+.settings-box h3 { margin-bottom: 15px; color: #ffd700; font-size: 1.1rem; }
+.controls { display: flex; align-items: center; gap: 5px; }
+
+/* Game Over & Placar */
 .reveal-box {
   background: rgba(255,255,255,0.1);
   padding: 15px;
   border-radius: 10px;
   margin: 20px 0;
+  border: 1px solid rgba(255,255,255,0.2);
 }
 
 .scoreboard {
   margin-top: 30px;
-  font-size: 0.9rem;
-  opacity: 0.7;
+  font-size: 0.85rem;
+  opacity: 0.8;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 15px;
 }
 
 .score-list {
@@ -179,29 +255,16 @@ button {
   justify-content: center;
   gap: 15px;
   flex-wrap: wrap;
+  margin-top: 5px;
 }
 
-.room-badge {
-  background: rgba(255,255,255,0.1);
-  display: inline-block;
-  padding: 5px 15px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  margin-bottom: 10px;
+/* Animações */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-.btn-small {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border-radius: 50%;
-  font-size: 1.2rem;
-  font-weight: bold;
-  background: rgba(255,255,255,0.2);
-  color: white;
-  border: 1px solid rgba(255,255,255,0.3);
-  margin: 0;
-}
-.btn-small:hover {
-  background: white;
-  color: #333;
+
+@keyframes flipIn {
+  from { transform: rotateX(90deg); opacity: 0; }
+  to { transform: rotateX(0); opacity: 1; }
 }
