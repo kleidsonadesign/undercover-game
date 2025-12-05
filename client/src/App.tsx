@@ -75,6 +75,31 @@ function App() {
   const votePlayer = (targetId: string) => socket.emit('vote_player', { roomId, targetId });
   const sendMrWhiteGuess = () => socket.emit('mr_white_guess', { roomId, guess: mrWhiteGuess });
 
+  // --- COMPONENTE DE REGRAS (Para não repetir código) ---
+  const RulesBox = () => (
+    <div className="rules-box">
+      <h3>📜 REGRAS (Passe o mouse)</h3>
+      <ul className="rules-list">
+        <li><strong>1.</strong> Cada jogador recebe uma palavra; todos iguais menos o <em>Espião</em> (que recebe uma parecida e não sabe).</li>
+        <li><strong>2.</strong> <em>Sr. Branco</em> não recebe palavra. Ele joga com os Espiões e deve se infiltrar.</li>
+        <li><strong>3.</strong> Na sua vez, dê <strong>uma pista</strong> curta sobre sua palavra.</li>
+        <li><strong>4.</strong> Proibido repetir pistas ou falar a palavra diretamente.</li>
+        <li><strong>5.</strong> Objetivo dos Inocentes: Expulsar os Espiões e o Sr. Branco.</li>
+        <li><strong>6.</strong> Objetivo dos Impostores: Não serem descobertos.</li>
+        <li><strong>7.</strong> A cada rodada ocorre uma votação para eliminar um suspeito.</li>
+        <li><strong>8.</strong> Se o <em>Sr. Branco</em> for eliminado, ele tem uma chance de chutar a palavra para vencer.</li>
+        <li><strong>9.</strong> <span style={{color: '#ffd700'}}>A PALAVRA CORRETA É A DOS CIVIS!</span></li>
+      </ul>
+    </div>
+  );
+
+  // --- COMPONENTE DE RODAPÉ ---
+  const Footer = () => (
+    <div className="site-footer">
+      Desenvolvido e Projetado por <strong>Kleidson Almeida Santos</strong>
+    </div>
+  );
+
   // --- TELA DE LOGIN (ENTRADA) ---
   if (!joined) {
     return (
@@ -109,10 +134,9 @@ function App() {
           </button>
         </div>
 
-        {/* RODAPÉ FIXO (FORA DO CONTAINER) */}
-        <div className="site-footer">
-          Desenvolvido e Projetado por <strong>Kleidson Almeida Santos</strong>
-        </div>
+        {/* Elementos Fixos */}
+        <RulesBox />
+        <Footer />
       </>
     );
   }
@@ -286,10 +310,9 @@ function App() {
         </div>
       </div>
 
-      {/* RODAPÉ FIXO (FORA DO CONTAINER) */}
-      <div className="site-footer">
-        Desenvolvido e Projetado por <strong>Kleidson Almeida Santos</strong>
-      </div>
+      {/* Elementos Fixos */}
+      <RulesBox />
+      <Footer />
     </>
   );
 }
